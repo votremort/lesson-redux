@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUsers, addUser } from "../../slices/users/usersSlice";
 
@@ -7,16 +7,18 @@ export const Users = () => {
    
   const users = useSelector((state) => state.users.list);
   const status = useSelector((state) => state.users.status);
+  const error = useSelector((state) => state.users.error);
 
   const [name, setName] = useState('');
+  const [showUsers, setShowUsers] = useState(false);
 
-  useEffect(() => {
-    if (status === 'loading') {
-      dispatch(fetchUsers());
-    }
-  }, [status, dispatch]);
+  const handleLoadUsers = () => {
+    dispatch(fetchUsers());
+    setShowUsers(true);
+  }
 
-  const handleAddUser = () => {
+  const handleAddUser = (e) => {
+    e.preventDefault();
     if (name.trim() !== '') {
       const newUser = {
         id: Date.now(),
@@ -30,6 +32,7 @@ export const Users = () => {
   return (
     <div>
       <h2>Пользователи</h2>
+      <button onClick={handleLoadUsers}>Показать пользователей</button>
       <div>
         <input 
           type="text"
@@ -39,13 +42,17 @@ export const Users = () => {
         />
         <button onClick={handleAddUser}>Добавить пользователя</button> 
       </div>
-      {status === 'loading' && <p>Загрузка</p>}
-      {status === 'failed' && <p>Ошибка загрузки данных</p>}
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>{user.name}</li>
-        ))}
-      </ul>
+      {showUsers && status === 'loading' && <p>Загрузка</p>}
+      {showUsers && status === 'failed' && <p>Ошибка загрузки данных</p>}
+      {users.length > 0 ?  (
+        <ul>
+          {users.map(user => (
+            <li key={user.id}>{user.name}</li>
+          ))}
+        </ul>
+      ): (
+        <p>Список пользователей пуст</p>
+      )}
     </div>
   )
 }

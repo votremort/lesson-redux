@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { act } from "react";
 
 export const fetchUsers = createAsyncThunk(
   'users/fetchUsers',
@@ -14,15 +13,12 @@ const usersSlice = createSlice({
   name: 'users',
   initialState:{
     list:[],
-    status: 'loading',
+    status: 'idle',
     error: null,
   },
   reducers: {
     addUser: (state, action) => {
       state.list.push(action.payload);
-    },
-    removeUser: (state, action) => {
-      state.list = state.list.filter(user => user.id !== action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -32,7 +28,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.list = action.payload;
+        state.list = [...state.list, ...action.payload]
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.status = 'failed';
@@ -41,5 +37,5 @@ const usersSlice = createSlice({
   },
 });
 
-export const { addUser, removeUser } = usersSlice.actions;
+export const { addUser } = usersSlice.actions;
 export default usersSlice.reducer;
